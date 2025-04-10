@@ -28,7 +28,6 @@ While developing the app, I encountered a few interesting challenges:
   
 - **Handling Asynchronous Data**: The app uses the `fetch()` function to make asynchronous requests. It was tricky to make sure data was fetched and handled properly — especially after performing actions like adding or deleting tasks, where the page shouldn’t reload.
 
-- **Creating DOM Elements Dynamically**: After a user adds a task, the task appears immediately in the list. I learned how to **create and insert elements using JavaScript** to reflect changes without a page reload.
 
 ---
 
