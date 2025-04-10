@@ -1,7 +1,7 @@
 
 # 📝 Django To-Do List Web App
 
-## 📌 Introduction
+## Introduction
 
 This is a simple To-Do List web application built using **Django** (Python web framework) for the backend and **HTML, CSS, and JavaScript** for the frontend. The app allows users to:
 
@@ -20,7 +20,7 @@ This is a simple To-Do List web application built using **Django** (Python web f
 
 ---
 
-## ⚠️ Challenges Faced
+## Challenges Faced
 
 While developing the app, I encountered a few interesting challenges:
 
@@ -32,15 +32,15 @@ While developing the app, I encountered a few interesting challenges:
 
 ---
 
-## 🔗 Demo
+## Demo
 
-> 🚀 **Live Demo**: _https://www.youtube.com_  
+>  **Live Demo**: _https://www.youtube.com_  
 
 
 ---
 
 
-## ✅ Conclusion
+## Conclusion
 
 Through this project, I learned how to:
 

@@ -16,6 +16,7 @@ LABEL_CHOICES = [
 
 class Task(models.Model):
     task_text = models.CharField(max_length=255)
+    task_description = models.TextField(null=True, blank=True)
     task_status = models.CharField(
         max_length=15,
         choices=STATUS_CHOICES,
