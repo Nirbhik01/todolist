@@ -82,13 +82,18 @@
         <h2>ToDo List</h2>
 
         <form id="taskForm">
+            <label for="">Task:</label>
             <input type="text" name="task_text" id="task_text" placeholder="Enter task description..." required />
+            <label for="">Due Date:</label>
+            <input type="date" name="due_date" id="due_date" placeholder="task duedate" />
+            <label for="">Label:</label>
             <select name="task_label" id="task_label">
                 <option value="WORK">Work</option>
                 <option value="GROCERY">Grocery</option>
                 <option value="STUDY">Study</option>
                 <option value="OTHER">Other</option>
             </select>
+            <label for="">Status:</label>
             <select name="task_status" id="task_status">
                 <option value="PENDING">Pending</option>
                 <option value="IN_PROGRESS">In Progress</option>
@@ -102,23 +107,26 @@
         <div id="filter" style="margin-top: 1rem;display:none;">
             <label>Filter by Label:</label>
             <select id="filterLabel">
-              <option value="">All</option>
-              <option value="WORK">Work</option>
-              <option value="GROCERY">Grocery</option>
-              <option value="STUDY">Study</option>
-              <option value="OTHER">Other</option>
+                <option value="">All</option>
+                <option value="WORK">Work</option>
+                <option value="GROCERY">Grocery</option>
+                <option value="STUDY">Study</option>
+                <option value="OTHER">Other</option>
             </select><br>
-          
+
             <label style="margin-left: 0rem;">Filter by Status:</label>
             <select id="filterStatus">
-              <option value="">All</option>
-              <option value="PENDING">Pending</option>
-              <option value="IN_PROGRESS">In Progress</option>
-              <option value="COMPLETED">Completed</option>
+                <option value="">All</option>
+                <option value="PENDING">Pending</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
             </select>
             <br>
+            <label>Filter by Due Date:</label>
+            <input type="date" id="filterDueDate">
+            <br>
             <button id="applyFiltersBtn">Apply Filters</button>
-          </div>
+        </div>
 
         <div class="task-list" id="taskList">
             <!-- Tasks will appear here -->
@@ -132,6 +140,7 @@
             const text = document.getElementById('task_text').value;
             const label = document.getElementById('task_label').value;
             const status = document.getElementById('task_status').value;
+            const dueDate = document.getElementById('due_date').value;
 
             fetch('/todo/add-task/', {
                 method: 'POST',
@@ -141,7 +150,8 @@
                 body: JSON.stringify({
                     task_text: text,
                     task_label: label,
-                    task_status: status
+                    task_status: status,
+                    due_date: dueDate
                 })
             })
                 .then(response => response.json())
@@ -154,6 +164,7 @@
                             <strong>${text}</strong><br>
                             <span class="badge">${label}</span>
                             <span class="badge">${status.replace('_', ' ')}</span>
+                            <span class="badge">Due: ${dueDate || 'N/A'}</span>
                             `;
                         document.getElementById('taskList').prepend(taskItem);
                         document.getElementById('taskForm').reset();
@@ -167,8 +178,8 @@
         });
 
         document.getElementById('showTasksBtn').addEventListener('click', function () {
-            
-            fetch('/todo/tasks/')  
+
+            fetch('/todo/tasks/')
                 .then(response => response.json())
                 .then(tasks => {
                     const taskList = document.getElementById('taskList');
@@ -181,58 +192,64 @@
                             <strong>${task.task_text}</strong><br>
                             <span class="badge">${task.task_label}</span>
                             <span class="badge">${task.task_status.replace('_', ' ')}</span>
+                            <span class="badge">Due: ${task.due_date || 'N/A'}</span>
                             <button onclick="deleteTask(${task.id})" >❌</button>
                                 `;
                         taskList.appendChild(taskItem);
                     });
-                    document.getElementById("filter").style.display="block";
+                    document.getElementById("filter").style.display = "block";
                 })
                 .catch(error => {
                     console.error('Error fetching tasks:', error);
                 });
-            });
-            document.getElementById('applyFiltersBtn').addEventListener('click', loadTasks);
-            function loadTasks() {
-                const label = document.getElementById('filterLabel').value;
-                const status = document.getElementById('filterStatus').value;
-    
-                const params = [];
-                if (label) params.push(`label=${label}`);
-                if (status) params.push(`status=${status}`);
-                if (params.length > 0) url += '?' + params.join('&');
-              
-                fetch('/todo/tasks/')
-                  .then(response => response.json())
-                  .then(tasks => {
+        });
+        document.getElementById('applyFiltersBtn').addEventListener('click', loadTasks);
+        function loadTasks() {
+            const label = document.getElementById('filterLabel').value;
+            const status = document.getElementById('filterStatus').value;
+            const dueDate = document.getElementById('filterDueDate').value;
+
+            const params = [];
+            let url = '/todo/filtertask/';
+            if (label) params.push(`label=${label}`);
+            if (status) params.push(`status=${status}`);
+            if (dueDate) params.push(`due_date=${dueDate}`);
+            if (params.length > 0) url += '?' + params.join('&');
+            console.log(dueDate);
+
+            fetch(url)
+                .then(response => response.json())
+                .then(tasks => {
                     const taskList = document.getElementById('taskList');
                     taskList.innerHTML = '';
                     tasks.forEach(task => {
-                      const taskItem = document.createElement('div');
-                      taskItem.className = 'task';
-                      taskItem.innerHTML = `
+                        const taskItem = document.createElement('div');
+                        taskItem.className = 'task';
+                        taskItem.innerHTML = `
                         <strong>${task.task_text}</strong><br>
                         <span class="badge">${task.task_label}</span>
                         <span class="badge">${task.task_status.replace('_', ' ')}</span>
+                        <span class="badge">Due: ${dueDate || 'N/A'}</span>
                         <button onclick="deleteTask(${task.id})" >❌</button>
                       `;
-                      taskList.appendChild(taskItem);
+                        taskList.appendChild(taskItem);
                     });
-                  });
-            }
-            function deleteTask(taskId) {
-                fetch(`/todo/delete-task/${taskId}/`, {
-                  method: 'DELETE',
-                })
+                });
+        }
+        function deleteTask(taskId) {
+            fetch(`/todo/delete-task/${taskId}/`, {
+                method: 'DELETE',
+            })
                 .then(response => response.json())
                 .then(data => {
-                  if (data.success) {
-                    document.getElementById('showTasksBtn').click(); 
-                  } else {
-                    alert("Delete failed: " + data.message);
-                  }
+                    if (data.success) {
+                        document.getElementById('showTasksBtn').click();
+                    } else {
+                        alert("Delete failed: " + data.message);
+                    }
                 });
-            }
-              
+        }
+
     </script>
 </body>
 

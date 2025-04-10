@@ -26,6 +26,7 @@ class Task(models.Model):
         choices=LABEL_CHOICES,
         default='WORK'
     )
+    due_date = models.DateField(null=True, blank=True) 
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
