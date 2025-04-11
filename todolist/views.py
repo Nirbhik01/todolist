@@ -40,7 +40,7 @@ def login_user(request):
         try:
             user = User.objects.get(username=username)
             if user.check_password(password):
-                request.session["user_id"] = user.id
+                request.session["user_id"] = user.user_id
                 return JsonResponse({"success": True, "message": "Login successful"})
             else:
                 return JsonResponse({"success": False, "message": "Incorrect password"})
@@ -57,17 +57,21 @@ def Home(request):
     if not request.session.get("user_id"):
         
         return redirect("todolist:login")
-    return render(request, "todolist/homepage.html",{"user_name": User.objects.get(id=request.session["user_id"]).username})
+    return render(request, "todolist/homepage.html",{"user_name": User.objects.get(user_id=request.session["user_id"]).username})
 
 def get_tasks_all(request):
-    tasks = Task.objects.all().values("id","task_text","task_description", "task_label", "task_status","due_date")
-    
+    user=request.session.get("user_id")
+    user=User.objects.get(user_id=user)
+    # select the task of the user stored in session
+    tasks = Task.objects.filter(user_task=user).values("id","task_text","task_description", "task_label", "task_status","due_date")
     return JsonResponse(list(tasks), safe=False)
 
 @csrf_exempt
 def add_task(request):
     if request.method == "POST":
         try:
+            user=request.session.get("user_id")
+            user=User.objects.get(user_id=user)
             data = json.loads(request.body)
             task_text = data.get("task_text")
             task_description = data.get("task_description")
@@ -76,6 +80,7 @@ def add_task(request):
             task_due_date = data.get("due_date") 
 
             task = Task.objects.create(
+                user_task=user,
                 task_text=task_text,
                 task_description=task_description,
                 task_label=task_label,
@@ -102,7 +107,9 @@ def get_tasks(request):
     if due_date:
         tasks = tasks.filter(due_date=due_date)
 
-    tasks_data = tasks.values('id', 'task_text', 'task_description','task_label', 'task_status','due_date')
+    # tasks_data = tasks.values('id', 'task_text', 'task_description','task_label', 'task_status','due_date')
+    # select the task of the user stored in session
+    tasks_data=tasks.filter(user_task=request.session.get("user_id")).values('id', 'task_text', 'task_description','task_label', 'task_status','due_date')
     return JsonResponse(list(tasks_data), safe=False)
 
 @csrf_exempt
@@ -122,6 +129,12 @@ def edit_task(request, task_id):
     if request.method == "PUT":
         try:
             task = Task.objects.get(id=task_id)
+            
+            # select the task of the user stored in session
+            user=request.session.get("user_id")
+            user=User.objects.get(user_id = user)
+            task = Task.objects.filter(user_task=user).get(id=task_id)
+            
             data = json.loads(request.body)
 
             task.task_text = data.get("task_text", task.task_text)

@@ -15,7 +15,22 @@ LABEL_CHOICES = [
     ('OTHER', 'Other'),
 ]
 
+class User(models.Model):
+    user_id = models.BigAutoField(primary_key=True)
+    username = models.CharField(max_length=150, unique=True)
+    password = models.CharField(max_length=255)
+
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
+
+    def __str__(self):
+        return self.username
+
 class Task(models.Model):
+    user_task = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tasks',default="user")
     task_text = models.CharField(max_length=255)
     task_description = models.TextField(null=True, blank=True)
     task_status = models.CharField(
@@ -37,18 +52,7 @@ class Task(models.Model):
 
 
 
-class User(models.Model):
-    username = models.CharField(max_length=150, unique=True)
-    password = models.CharField(max_length=255)
 
-    def set_password(self, raw_password):
-        self.password = make_password(raw_password)
-
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.password)
-
-    def __str__(self):
-        return self.username
 
 
 
