@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+</head>
+<style>
+    body{
+        display: flex   ;
+        align-items: center;
+        justify-content:center;
+        
+    }
+    form{
+
+        font-family: Arial, sans-serif;
+        background-color: #f3f4f6;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        width: 200px;
+        margin: auto;
+        border-radius: 10px;
+        justify-items:center;
+        align-items: center;
+    }
+    p{
+        margin-top: 2rem;
+        font-size:10px;
+    }
+</style>
+<body>
+    <form id="loginForm">
+        <h2>Login</h2>
+        <input type="text" id="username" placeholder="Username" required><br>
+        <input type="password" id="password" placeholder="Password" required><br>
+        <button type="submit">Login</button>
+        <p>Don't have an account? <a href="{% url 'todolist:register' %}">Register here</a></p>
+    </form>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            fetch("/todo/login-user/", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    window.location.href = "/todo/";
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

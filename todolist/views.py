@@ -1,11 +1,63 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import JsonResponse
-from .models import Task
+from .models import Task,User
 from django.views.decorators.csrf import csrf_exempt
 import json
 
+def login_page(request):
+    return render(request, "todolist/login.html")
+
+def register_page(request):
+    return render(request, "todolist/register.html")
+
+
+
+@csrf_exempt
+def register_user(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get("username")
+        password = data.get("password")
+
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({"success": False, "message": "Username already taken"})
+
+        user = User(username=username)
+        user.set_password(password)
+        user.save()
+
+        return JsonResponse({"success": True, "message": "User registered successfully"})
+
+    return JsonResponse({"success": False, "message": "Invalid request"})
+
+@csrf_exempt
+def login_user(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        username = data.get("username")
+        password = data.get("password")
+
+        try:
+            user = User.objects.get(username=username)
+            if user.check_password(password):
+                request.session["user_id"] = user.id
+                return JsonResponse({"success": True, "message": "Login successful"})
+            else:
+                return JsonResponse({"success": False, "message": "Incorrect password"})
+        except User.DoesNotExist:
+            return JsonResponse({"success": False, "message": "User not found"})
+
+    return JsonResponse({"success": False, "message": "Invalid request"})
+
+def logout_user(request):
+    request.session.flush()
+    return redirect("todolist:login")
+
 def Home(request):
-    return render(request, "todolist/homepage.html")
+    if not request.session.get("user_id"):
+        
+        return redirect("todolist:login")
+    return render(request, "todolist/homepage.html",{"user_name": User.objects.get(id=request.session["user_id"]).username})
 
 def get_tasks_all(request):
     tasks = Task.objects.all().values("id","task_text","task_description", "task_label", "task_status","due_date")

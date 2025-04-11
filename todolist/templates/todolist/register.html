@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+</head>
+<style>
+    form{
+
+        font-family: Arial, sans-serif;
+        background-color: #f3f4f6;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        width: 200px;
+        margin: auto;
+        border-radius: 10px;
+        justify-items:center;
+    }
+    p{
+        margin-top: 2rem;
+        font-size:10px;
+    }
+</style>
+<body>
+    <form id="registerForm">
+        <h2>Register</h2>
+        <input type="text" id="username" placeholder="Username" required><br>
+        <input type="password" id="password" placeholder="Password" required><br>
+        <button type="submit">Register</button>
+        <p>Already have an account? <a href="{% url 'todolist:login' %}">Login here</a></p>
+    </form>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            fetch("/todo/register-user/", {
+                method: "POST",
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if(data.success) {
+                    window.location.href = "/todo/login/";
+                } else {
+                    alert(data.message);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

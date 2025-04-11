@@ -80,6 +80,7 @@
 <body>
     <div class="container">
         <h2>ToDo List</h2>
+        <h2>Welcome {{user_name}}!!</h2>
 
         <form id="taskForm">
             <label for="">Task:</label>
@@ -161,6 +162,7 @@
                 <button type="button" onclick="cancelEdit()">Cancel</button>
             </form>
         </div>
+        <button id="logoutBtn" style="margin-top: 1.5rem;" onclick="Logout()">Logout</button>
     </div>
 
     
@@ -343,6 +345,16 @@
                 console.error('Error updating task:', error);
             });
         });
+        function Logout() {
+            fetch('/todo/logout/')
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = '/todo/login/';
+                    } else {
+                        alert("Logout failed.");
+                    }
+                });
+        }
         
         
 
